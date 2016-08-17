@@ -71,7 +71,12 @@ module I18n
             end
 
             namespace = "#{keys.last}#{I18n::Backend::Flatten::FLATTEN_SEPARATOR}%"
-            where("#{column_name} IN (?) OR #{column_name} LIKE ?", keys, namespace)
+            # SimpleBackend allows one to call t('.') which will return all
+            # translations for the selected locale. Implement that case, here,
+            # too
+            unless keys.size == 1 && keys.first == '.'
+              where("#{column_name} IN (?) OR #{column_name} LIKE ?", keys, namespace)
+            end
           end
 
           def available_locales
