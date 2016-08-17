@@ -58,7 +58,11 @@ module I18n
 
         class << self
           def locale(locale)
-            where(:locale => locale.to_s)
+            if locale.to_s == '.'
+              all
+            else
+              where(:locale => locale.to_s)
+            end
           end
 
           def lookup(keys, *separator)
@@ -74,7 +78,9 @@ module I18n
             # SimpleBackend allows one to call t('.') which will return all
             # translations for the selected locale. Implement that case, here,
             # too
-            unless keys.size == 1 && keys.first == '.'
+            if keys.size == 1 && keys.first == '.'
+              all
+            else
               where("#{column_name} IN (?) OR #{column_name} LIKE ?", keys, namespace)
             end
           end
