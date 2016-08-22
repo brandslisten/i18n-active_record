@@ -38,9 +38,23 @@ module I18n
           elsif result.first.key == key
             result.first.value
           else
-            chop_range = (key.size + FLATTEN_SEPARATOR.size)..-1
+            chop_range = if(key != '.')
+              (key.size + FLATTEN_SEPARATOR.size)..-1
+            else
+              # Do not chop any string off of in the case of a '.', when we
+              # return all translations
+              0..-1
+            end
             result = result.inject({}) do |hash, r|
-              hash[r.key.slice(chop_range)] = r.value
+              # Return a nested hash so that its compatible with the results of
+              # SimpleBackend
+              hash = r.key.slice(chop_range)
+                .split(FLATTEN_SEPARATOR)
+                .reverse
+                .reduce(r.value) do |nested_key_hash, split_key|
+                {"#{split_key}": nested_key_hash}
+              end
+              # hash[r.key.slice(chop_range)] = r.value
               hash
             end
             result.deep_symbolize_keys
