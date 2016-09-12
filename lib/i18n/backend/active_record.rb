@@ -48,12 +48,14 @@ module I18n
             result = result.inject({}) do |hash, r|
               # Return a nested hash so that its compatible with the results of
               # SimpleBackend
-              hash = r.key.slice(chop_range)
-                .split(FLATTEN_SEPARATOR)
-                .reverse
-                .reduce(r.value) do |nested_key_hash, split_key|
-                {"#{split_key}": nested_key_hash}
-              end
+              hash = hash.deep_merge(
+                r.key.slice(chop_range)
+                  .split(FLATTEN_SEPARATOR)
+                  .reverse
+                  .reduce(r.value) do |nested_key_hash, split_key|
+                    {"#{split_key}": nested_key_hash}
+                  end
+              )
               # hash[r.key.slice(chop_range)] = r.value
               hash
             end
